@@ -1,12 +1,12 @@
-import { createData } from "./createData";
-import { Invoice, ObjectData, Player } from "./types";
-import { getData, kwr } from "./utils";
+import { createData } from './createData';
+import { Invoice, ObjectData, Player } from './types';
+import { getData, kwr } from './utils';
 
 (async function () {
-  const invoices = await getData("/public/data/invoices");
-  const plays = await getData("/public/data/play");
+  const invoices = await getData('/public/data/invoices');
+  const plays = await getData('/public/data/play');
   const result = statement(invoices, plays);
-  const root = document.getElementById("root")!;
+  const root = document.getElementById('root')!;
   root.innerText = result;
 })();
 
