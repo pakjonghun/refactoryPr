@@ -27,6 +27,7 @@ export class TrackingInformation {
   }
 }
 
+//Fixme:별다른 getter setter 이므로 한번 더 depth 을 타야 해서 안좋음 이럴때는 합치는게 더 나을수도 있다.
 export class Shipment {
   #trackingInformation;
   constructor(trackingInformation) {

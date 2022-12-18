@@ -1,4 +1,7 @@
 function foundPerson(people) {
+  const whiteList = ['Don', 'John', 'Kent'];
+  return people.find((p) => whiteList.includes(p)) || '';
+
   for (let i = 0; i < people.length; i++) {
     if (people[i] === 'Don') {
       return 'Don';
