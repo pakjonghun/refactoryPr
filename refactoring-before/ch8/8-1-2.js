@@ -1,6 +1,10 @@
+//FIXME:문제 없는 것 같아 보인다.
+
+//NOTE: if(type.isPrimary) 가 메인 조건이므로 type 로 옮기는 것이 더 좋아보인다.
+//이렇게 빼니 파입이 필요가 없어져서 어카운트 di 에서 빼버렸다.
+
 export class Account {
-  constructor(accountType, daysOverdrawn) {
-    this.type = accountType;
+  constructor() {
     this._daysOverdrawn = daysOverdrawn;
   }
 
@@ -8,14 +12,6 @@ export class Account {
     let result = 4.5;
     if (this._daysOverdrawn > 0) result += this.overdraftCharge;
     return result;
-  }
-
-  get overdraftCharge() {
-    if (this.type.isPremium) {
-      const baseCharge = 10;
-      if (this._daysOverdrawn <= 7) return baseCharge;
-      else return baseCharge + (this._daysOverdrawn - 7) * 0.85;
-    } else return this._daysOverdrawn * 1.75;
   }
 
   get daysOverdrawn() {
@@ -29,5 +25,15 @@ export class AccountType {
   }
   get isPremium() {
     return this._type === 'Premium';
+  }
+
+  overdraftCharge(daysOverdrawn) {
+    if (!this.isPremium) {
+      return this.daysOverdrawn * 1.75;
+    }
+
+    return daysOverdrawn <= 7
+      ? 10
+      : baseCharge + (this.daysOverdrawn - 7) * 0.85;
   }
 }
