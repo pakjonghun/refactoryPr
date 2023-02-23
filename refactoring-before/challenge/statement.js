@@ -72,6 +72,14 @@ class Statement {
     this.invoice = invoice;
   }
 
+  usd(number) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+    }).format(number);
+  }
+
   calcAmount(play, perf) {
     switch (play.type) {
       case 'tragedy':
@@ -79,7 +87,7 @@ class Statement {
           return 40000 + 1000 * (perf.audience - 30);
         }
         return 40000;
-      case 'comedy': // 희극
+      case 'comedy':
         if (perf.audience > 20) {
           return (
             30000 + 10000 + 500 * (perf.audience - 20) + 300 * perf.audience
@@ -91,54 +99,46 @@ class Statement {
     }
   }
 
+  play(playId) {
+    return this.plays[playId];
+  }
+
   get calcTotalAmount() {
     return this.invoice.performances.reduce((acc, perf) => {
-      return acc + this.calcAmount(this.plays[perf.playID], perf);
+      return acc + this.calcAmount(this.play(perf.playID), perf);
     }, 0);
   }
 
   get calcVolumeCredit() {
-    let result = 0;
-    for (let perf of this.invoice.performances) {
-      const play = this.plays[perf.playID];
-      // 포인트를 적립한다.
-      result += Math.max(perf.audience - 30, 0);
-      // 희극 관객 5명마다 추가 포인트를 제공한다.
-      if ('comedy' === play.type) result += Math.floor(perf.audience / 5);
+    return this.invoice.performances.reduce((acc, perf) => {
+      return this.volumeCreditByPerf(perf) + acc;
+    }, 0);
+  }
+
+  volumeCreditByPerf(perf) {
+    let result = Math.max(perf.audience - 30, 0);
+    if ('comedy' === this.play(perf.playID).type) {
+      result += Math.floor(perf.audience / 5);
     }
 
     return result;
   }
 
-  calcResult(format) {
+  get calcResult() {
     let result = `청구 내역 (고객명: ${this.invoice.customer})\n`;
     for (let perf of this.invoice.performances) {
-      const play = this.plays[perf.playID];
-      const thisAmount = this.calcAmount(play, perf);
-
-      // 청구 내역을 출력한다.
-      result += `  ${play.name}: ${format(thisAmount / 100)} (${
-        perf.audience
-      }석)\n`;
+      result += `  ${this.play(perf.playID).name}: ${this.usd(
+        this.calcAmount(this.play(perf.playID), perf) / 100
+      )} (${perf.audience}석)\n`;
     }
 
     return result;
   }
 
   get statement() {
-    const totalAmount = this.calcTotalAmount;
-    const volumeCredits = this.calcVolumeCredit;
-
-    const format = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-    }).format;
-
-    let result = this.calcResult(format);
-
-    result += `총액: ${format(totalAmount / 100)}\n`;
-    result += `적립 포인트: ${volumeCredits}점\n`;
+    let result = this.calcResult;
+    result += `총액: ${this.usd(this.calcTotalAmount / 100)}\n`;
+    result += `적립 포인트: ${this.calcVolumeCredit}점\n`;
     return result;
   }
 }
